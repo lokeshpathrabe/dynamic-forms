@@ -6,11 +6,10 @@ import {
   FormGroup,
   Button,
   FormText,
-  Form
+  Form,
 } from "reactstrap";
-import CheckboxField from "./components/checkbox";
 import FieldRenderer from "./FieldRenderer";
-import { useFormik } from "formik";
+import { Formik } from "formik";
 
 const DynamicForm = ({ config }) => {
   const initialValues = config.reduce((val, c) => {
@@ -18,27 +17,29 @@ const DynamicForm = ({ config }) => {
     return val;
   }, {});
 
-  const formik = useFormik({
-    initialValues,
-    onSubmit: (values) => {
-      console.log(JSON.stringify(values, null, 2));
-    }
-  });
-
   return (
-    <Form onSubmit={(e) => formik.handleSubmit}>
-      <FieldRenderer formik={formik} config={config} />
-      <FormGroup check row>
-        <Col
-          sm={{
-            offset: 2,
-            size: 10
-          }}
-        >
-          <Button>Submit</Button>
-        </Col>
-      </FormGroup>
-    </Form>
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values) => {
+        console.log(JSON.stringify(values, null, 2));
+      }}
+    >
+      {(formikProps) => (
+        <Form onSubmit={formikProps.handleSubmit}>
+          <FieldRenderer config={config} />
+          <FormGroup check row>
+            <Col
+              sm={{
+                offset: 2,
+                size: 10,
+              }}
+            >
+              <Button type="submit">Submit</Button>
+            </Col>
+          </FormGroup>
+        </Form>
+      )}
+    </Formik>
   );
 };
 

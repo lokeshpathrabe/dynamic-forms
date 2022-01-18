@@ -1,14 +1,14 @@
 import { Formik } from "formik";
-import React from "react";
+import React, { useEffect } from "react";
 import { Input, FormGroup, Label, Col } from "reactstrap";
+import { useDynamicForms } from "./../utils";
+import { useFormikContext } from "formik";
 
-const CheckBoxField = ({ config, formik }) => {
-  const disabled = Boolean(config.dependsOn)
-    ? !Boolean(formik.values[config.dependsOn])
-    : false;
-  const value = Boolean(config.deriveFrom)
-    ? formik.values[config.deriveFrom]
-    : formik.values[config.id];
+const CheckBoxField = ({ config }) => {
+  const { enabled, value } = useDynamicForms(config);
+  const { handleChange } = useFormikContext();
+  console.log(config.id, enabled, value);
+
   return (
     <FormGroup row>
       <Label sm={4}>{config.label}</Label>
@@ -16,9 +16,9 @@ const CheckBoxField = ({ config, formik }) => {
         <Input
           name={config.id}
           type="checkbox"
-          onChange={formik.handleChange}
+          onChange={handleChange}
           checked={value}
-          disabled={disabled}
+          disabled={!enabled}
         />
       </Col>
     </FormGroup>
