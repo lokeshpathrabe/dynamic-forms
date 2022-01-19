@@ -1,7 +1,7 @@
 import { useFormikContext } from "formik";
 import { useEffect } from "react";
 
-const executeCondition = (cfg, values) => {
+export const executeCondition = (cfg, values) => {
   let bool;
   switch (cfg.op) {
     case "AND":
@@ -49,7 +49,7 @@ const executeCondition = (cfg, values) => {
   return bool;
 };
 
-const getEnableIf = (config, values) => {
+export const getEnableIf = (config, values) => {
   if (typeof config === "boolean") {
     return config;
   }
@@ -68,9 +68,16 @@ const getEnableIf = (config, values) => {
   return true;
 };
 
-const deriveValue = (config, formikValues) => {
+export const deriveValue = (config, formikValues) => {
   const deriveConfig = config.deriveFrom;
+  const regex = /^!(.*)/gm;
+
   if (typeof deriveConfig === "string") {
+    const match = regex.exec(deriveConfig);
+    if (match && match.length > 0) {
+      const fieldName = match[1];
+      return !formikValues[fieldName];
+    }
     return formikValues[deriveConfig];
   }
 
@@ -78,6 +85,14 @@ const deriveValue = (config, formikValues) => {
     return [...deriveConfig].reduce((value, cfg, i, arr) => {
       if (typeof cfg === "string") {
         arr.splice(i); // exit loop
+
+        const match = regex.exec(deriveConfig);
+        if (match && match.length > 0) {
+          const fieldName = match[1];
+          return value === true
+            ? !formikValues[fieldName]
+            : formikValues[config.id];
+        }
         return value === true ? formikValues[cfg] : formikValues[config.id];
       }
       if (!Boolean(cfg.op)) {
@@ -90,21 +105,4 @@ const deriveValue = (config, formikValues) => {
       return value || result;
     }, false);
   }
-};
-
-export const useDynamicForms = (config) => {
-  const { values: formikValues, setFieldValue } = useFormikContext();
-  const enabled = getEnableIf(config.enableIf, formikValues);
-  const value = Boolean(config.deriveFrom)
-    ? deriveValue(config, formikValues)
-    : formikValues[config.id];
-
-  useEffect(() => {
-    setFieldValue(config.id, value);
-  }, [value]);
-
-  return {
-    enabled,
-    value,
-  };
 };

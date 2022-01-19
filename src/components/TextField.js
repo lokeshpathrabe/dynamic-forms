@@ -2,25 +2,30 @@ import React from "react";
 import { Input, FormGroup, Label, Col } from "reactstrap";
 import { useDynamicField } from "../lib";
 import { useFormikContext } from "formik";
+import { config } from "react-transition-group";
 
-const CheckBoxField = (props) => {
+const TextField = (props) => {
   const { config } = props;
   const { enabled, value } = useDynamicField(props);
   const { handleChange } = useFormikContext();
   return (
     <FormGroup row>
-      <Label sm={4}>{config.label}</Label>
+      <Label sm={4} for="exampleEmail">
+        {config.label}
+      </Label>
       <Col sm={6}>
         <Input
+          id={config.id}
           name={config.id}
-          type="checkbox"
-          onChange={handleChange}
-          checked={value}
+          placeholder="Enter some text"
+          type="text"
           disabled={!enabled}
+          value={value}
+          onChange={handleChange}
         />
       </Col>
     </FormGroup>
   );
 };
 
-export default CheckBoxField;
+export default TextField;
